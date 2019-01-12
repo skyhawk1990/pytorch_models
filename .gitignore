@@ -1,0 +1,12 @@
+*.pkl
+*.txt
+*.npy
+*.log
+*.bin
+*.tsv
+*.csv
+model
+data
+.idea
+__pycache__
+__init__.py
