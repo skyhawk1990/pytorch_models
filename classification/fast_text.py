@@ -113,5 +113,5 @@ def train_and_predict_by_self_realization(train_data_path, valid_data_path, voca
 
 
 if __name__=='__main__':
-    train_and_predict_by_fasttext('../data/baike/train.csv', '../data/baike/valid.csv')
-    # train_and_predict_by_self_realization('../data/baike/train.csv', '../data/baike/valid.csv', '../model/vocab')
+    # train_and_predict_by_fasttext('../data/baike/train.csv', '../data/baike/valid.csv')
+    train_and_predict_by_self_realization('../data/baike/train.csv', '../data/baike/valid.csv', '../model/vocab')
