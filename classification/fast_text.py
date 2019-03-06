@@ -16,6 +16,7 @@ from optimization import Learner
 def train_and_predict_by_fasttext(train_data_path, valid_data_path):
     """
     利用fasttext包进行训练和预测. 训练集和测试集的准确率分别是0.71和0.68
+    FAQ: https://fasttext.cc/docs/en/faqs.html
     :param train_data_path: 训练集路径
     :param valid_data_path: 测试集路径
     """
