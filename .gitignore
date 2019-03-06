@@ -5,8 +5,12 @@
 *.bin
 *.tsv
 *.csv
+*.gz
+temp
 model
 data
+assistant.ipynb
+.ipynb_checkpoints
 .idea
 __pycache__
 __init__.py

@@ -6,7 +6,12 @@ from torch import optim
 from data_util import is_listy, to_device
 from sklearn.metrics import accuracy_score, confusion_matrix
 from matplotlib import pyplot as plt
-import matplotlib.ticker as ticker
+import matplotlib as mpl
+
+mpl.rcParams['font.family'] = 'sans-serif'
+mpl.rcParams['font.sans-serif'] = 'SimHei'
+mpl.rcParams['axes.unicode_minus'] = False
+
 
 class Learner():
     # 模型训练
@@ -72,6 +77,7 @@ def confusion_eval(model, valid_dl, label_map):
             labels += yb.numpy().tolist()
 
     confusion = confusion_matrix(labels, preds)
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     cax = ax.matshow(confusion)
@@ -80,7 +86,7 @@ def confusion_eval(model, valid_dl, label_map):
     # 设置x轴的文字往上走
     ax.set_xticklabels([''] + list(label_map.keys()), rotation=90)
     ax.set_yticklabels([''] + list(label_map.keys()))
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
 
     plt.show()
