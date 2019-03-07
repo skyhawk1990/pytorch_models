@@ -6,6 +6,7 @@ import numpy as np
 import fasttext
 import sys
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 sys.path.append('../')
 from data_util import FasttextReader, NormalDataReader, DataBunch, Tokenizer, sequence2vocab
 from optimization import Learner
@@ -62,7 +63,8 @@ class Lambda(nn.Module):
         super().__init__()
         self.func = func
 
-    def forward(self, x): return self.func(x)
+    def forward(self, x):
+        return self.func(x)
 
 
 def reduce_mean():
