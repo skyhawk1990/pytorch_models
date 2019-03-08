@@ -39,19 +39,19 @@ def reduce_mean():
     return Lambda(lambda x: x[0].mean(dim=1))
 
 
-def lstm_model(vocab_size, embedding_size, hidden_size, num_layers, bidirectional, droupout, label_size):
+def lstm_model(vocab_size, embedding_size, hidden_size, num_layers, bidirectional, dropout, label_size):
     # 自实现的fasttext
     layers = [nn.Embedding(vocab_size, embedding_size),
-              nn.LSTM(embedding_size, hidden_size, num_layers, True, True, droupout, bidirectional),
+              nn.LSTM(embedding_size, hidden_size, num_layers, True, True, dropout, bidirectional),
               reduce_mean(),
               nn.Linear(hidden_size*2 if bidirectional else hidden_size, label_size)]
     return nn.Sequential(*layers)
 
 
-def gru_model(vocab_size, embedding_size, hidden_size, num_layers, droupout, bidirectional, label_size):
+def gru_model(vocab_size, embedding_size, hidden_size, num_layers, dropout, bidirectional, label_size):
     # 自实现的fasttext
     layers = [nn.Embedding(vocab_size, embedding_size),
-              nn.GRU(embedding_size, hidden_size, num_layers, True, True, droupout, bidirectional),
+              nn.GRU(embedding_size, hidden_size, num_layers, True, True, dropout, bidirectional),
               reduce_mean(),
               nn.Linear(hidden_size*2 if bidirectional else hidden_size, label_size)]
     return nn.Sequential(*layers)
@@ -64,7 +64,7 @@ class GRUCombineInputOutput(nn.Module):
         super(GRUCombineInputOutput, self).__init__(**kwargs)
         self.embedding = nn.Embedding(vocab_size, embedding_size)
         self.encoder = nn.GRU(embedding_size, hidden_size, num_layers, True, True, dropout, bidirectional)
-        if self.bidirectional:
+        if bidirectional:
             self.decoder = nn.Linear(embedding_size + hidden_size * 2, label_size)
         else:
             self.decoder = nn.Linear(embedding_size + hidden_size, label_size)
@@ -79,11 +79,11 @@ class GRUCombineInputOutput(nn.Module):
 
 def train_and_predict_by_lstm(train_data_path, valid_data_path, vocab_path):
     """
-    利用pytorch的lstm和gru模块进行建模.
-    测试集准确率分别是
+    利用pytorch的lstm和gru模块进行建模. 测试集准确率分别是
     3层lstm: 0.6545; 3层bi-lstm: 0.6627
     3层gru: 0.6696; 3层bi-gru: 0.6651
-    3层gru模型embedding+output作为输出:
+    3层gru模型embedding+output作为输出: 0.6972
+
     :param train_data_path: 训练集路径
     :param valid_data_path: 测试集路径
     :param vocab_path: 字典路径
@@ -112,9 +112,9 @@ def train_and_predict_by_lstm(train_data_path, valid_data_path, vocab_path):
     valid_ds = TensorDataset(x_valid, y_valid)
 
     data = DataBunch.create(train_ds, valid_ds, batch_size=64)
-    # model = lstm_model(tokenizer.get_vocab_size(), embedding_size=32, hidden_size=64, num_layers=3, droupout=0.3, bidirectional=True, label_size=len(label_map))
-    # model = gru_model(tokenizer.get_vocab_size(), embedding_size=32, hidden_size=64, num_layers=3, droupout=0.3, bidirectional=False, label_size=len(label_map))
-    model = GRUCombineInputOutput(tokenizer.get_vocab_size(), embedding_size=32, hidden_size=64, num_layers=3, droupout=0.3, bidirectional=True, label_size=len(label_map))
+    # model = lstm_model(tokenizer.get_vocab_size(), embedding_size=32, hidden_size=64, num_layers=3, dropout=0.3, bidirectional=True, label_size=len(label_map))
+    # model = gru_model(tokenizer.get_vocab_size(), embedding_size=32, hidden_size=64, num_layers=3, dropout=0.3, bidirectional=False, label_size=len(label_map))
+    model = GRUCombineInputOutput(tokenizer.get_vocab_size(), embedding_size=32, hidden_size=64, num_layers=3, dropout=0.3, bidirectional=True, label_size=len(label_map))
     learner = Learner(data, model)
     learner.fit(epochs=5, lr=0.1, opt_fn=optim.Adagrad)
     learner.accuracy_eval()
