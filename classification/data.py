@@ -21,13 +21,15 @@ def label2ids(label_map, ds):
     return ids
 
 
-def read_data(train_data_path, valid_data_path, vocab_path):
+def read_data(train_data_path, valid_data_path, vocab_path,
+              max_seq_length=48,
+              temp_path='../data/temp/train_valid.npy',
+              text_func=text2ids,
+              label_func=label2ids):
+
     tokenizer = Tokenizer(vocab_path, 5)
-    if os.path.exists('../data/baike/x_train.npy'):
-        x_train = np.load('../data/baike/x_train.npy')
-        y_train = np.load('../data/baike/y_train.npy')
-        x_valid = np.load('../data/baike/x_valid.npy')
-        y_valid = np.load('../data/baike/y_valid.npy')
+    if os.path.exists(temp_path):
+        x_train, y_train, x_valid, y_valid = np.load(temp_path)
         label_map = {label: i for i, label in enumerate(sorted(set(y_train)))}
     else:
         reader = NormalDataReader()
@@ -41,15 +43,12 @@ def read_data(train_data_path, valid_data_path, vocab_path):
 
         label_map = {label: i for i, label in enumerate(sorted(set(y_train)))}
 
-        x_train = text2ids(tokenizer, x_train, max_seq_length=48)
-        y_train = label2ids(label_map, y_train)
-        x_valid = text2ids(tokenizer, x_valid, max_seq_length=48)
-        y_valid = label2ids(label_map, y_valid)
+        x_train = text_func(tokenizer, x_train, max_seq_length=max_seq_length)
+        y_train = label_func(label_map, y_train)
+        x_valid = text_func(tokenizer, x_valid, max_seq_length=max_seq_length)
+        y_valid = label_func(label_map, y_valid)
 
-        np.save('../data/baike/x_train.npy', x_train)
-        np.save('../data/baike/y_train.npy', y_train)
-        np.save('../data/baike/x_valid.npy', x_valid)
-        np.save('../data/baike/y_valid.npy', y_valid)
+        np.save(temp_path, [x_train, y_train, x_valid, y_valid])
 
     x_train, y_train, x_valid, y_valid = map(tensor, (x_train, y_train, x_valid, y_valid))
     print(y_train[0], x_train[0])

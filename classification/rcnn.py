@@ -5,9 +5,10 @@ from torch.functional import F
 from data import read_data
 import sys
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 sys.path.append('../')
 from optimization import Learner
+from data_util import to_device
 
 
 ##############################################################################################################################################
@@ -61,12 +62,12 @@ class RCNN(nn.Module):
         # 1. get size of embeddings
         batch_size, max_seq_length, embedding_size = embeddings.size()
         # 2. get list of context left
-        embedding_previous = randn((batch_size, embedding_size), requires_grad=True)
-        context_left_previous = zeros((batch_size, embedding_size), requires_grad=True)
+        embedding_previous = to_device(randn((batch_size, embedding_size), requires_grad=True))
+        context_left_previous = to_device(zeros((batch_size, embedding_size), requires_grad=True))
         context_left_list = []
         for i in range(max_seq_length):
-            weight_l = randn((embedding_size, embedding_size), requires_grad=True)
-            weight_sl = randn((embedding_size, embedding_size), requires_grad=True)
+            weight_l = to_device(randn((embedding_size, embedding_size), requires_grad=True))
+            weight_sl = to_device(randn((embedding_size, embedding_size), requires_grad=True))
             context_left = add(context_left_previous.matmul(weight_l), embedding_previous.matmul(weight_sl))
             context_left = tanh(context_left)
             context_left_list.append(context_left.unsqueeze(0))
@@ -74,12 +75,12 @@ class RCNN(nn.Module):
             embedding_previous = embeddings[:, i, :]
         context_left_list = cat(context_left_list, dim=0)
         # 3. get list of context right
-        embedding_following = randn((batch_size, embedding_size), requires_grad=True)
-        context_right_following = zeros((batch_size, embedding_size), requires_grad=True)
+        embedding_following = to_device(randn((batch_size, embedding_size), requires_grad=True))
+        context_right_following = to_device(zeros((batch_size, embedding_size), requires_grad=True))
         context_right_list = []
         for i in range(max_seq_length):
-            weight_r = randn((embedding_size, embedding_size), requires_grad=True)
-            weight_sr = randn((embedding_size, embedding_size), requires_grad=True)
+            weight_r = to_device(randn((embedding_size, embedding_size), requires_grad=True))
+            weight_sr = to_device(randn((embedding_size, embedding_size), requires_grad=True))
             context_right = add(context_right_following.matmul(weight_r), embedding_following.matmul(weight_sr))
             context_right = tanh(context_right)
             context_right_list.insert(0, context_right.unsqueeze(0))
@@ -102,7 +103,7 @@ class RCNN(nn.Module):
 
 def train_and_predict_by_rcnn(train_data_path, valid_data_path, vocab_path):
     """
-    利用pytorch实现RCNN进行建模，并与BiLSTM-CNN对比。BiLSTM-CNN测试集准确率为0.6692
+    利用pytorch实现RCNN进行建模，并与BiLSTM-CNN对比。BiLSTM-CNN测试集准确率为0.6692，RCNN准确率为0.6288
     :param train_data_path: 训练集路径
     :param valid_data_path: 测试集路径
     :param vocab_path: 字典路径

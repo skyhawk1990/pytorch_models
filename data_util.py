@@ -86,7 +86,7 @@ def is_listy(x):
     return isinstance(x, (tuple, list))
 
 
-def to_device(b, device):
+def to_device(b, device=None):
     # 将tensors转换到gpu上
     device = ifnone(device, default_device)
     if is_listy(b):
