@@ -2,6 +2,10 @@
 
 基于pytorch自实现常用nlp模型
 1. fasttext
+2. rnn
+3. cnn
+4. rcnn
+5. han
 
 ### 数据集
 1. [路透社新闻主题分类](http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.html)
