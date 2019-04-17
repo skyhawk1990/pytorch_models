@@ -23,6 +23,7 @@ def label2ids(label_map, ds):
 
 def read_data(train_data_path, valid_data_path, vocab_path,
               max_seq_length=48,
+              batch_size=64,
               temp_path='../data/temp/train_valid.npy',
               text_func=text2ids,
               label_func=label2ids):
@@ -56,5 +57,5 @@ def read_data(train_data_path, valid_data_path, vocab_path,
     train_ds = TensorDataset(x_train, y_train)
     valid_ds = TensorDataset(x_valid, y_valid)
 
-    data = DataBunch.create(train_ds, valid_ds, batch_size=64)
+    data = DataBunch.create(train_ds, valid_ds, batch_size=batch_size)
     return tokenizer, label_map, data

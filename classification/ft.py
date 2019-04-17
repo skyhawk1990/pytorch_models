@@ -3,9 +3,8 @@
 from torch import nn, optim
 from data import read_data
 import fasttext
-import sys
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+import sys
 sys.path.append('../')
 from data_util import FasttextReader
 from optimization import Learner
@@ -15,7 +14,7 @@ from optimization import Learner
 
 def train_and_predict_by_fasttext(train_data_path, valid_data_path):
     """
-    利用fasttext包进行训练和预测. 训练集和测试集的准确率分别是0.71和0.68
+    利用fasttext包进行训练和预测. 10轮, 测试集的准确率为0.70
     FAQ: https://fasttext.cc/docs/en/faqs.html
     :param train_data_path: 训练集路径
     :param valid_data_path: 测试集路径
@@ -25,15 +24,17 @@ def train_and_predict_by_fasttext(train_data_path, valid_data_path):
     valid_path = '../data/temp/valid'
     model_path = '../model/fasttext'
 
-    with open(train_path, 'w', encoding='utf-8') as file:
-        for v in reader.get_train_data(train_data_path):
-            file.write(v + '\n')
-    with open(valid_path, 'w', encoding='utf-8') as file:
-        for v in reader.get_valid_data(valid_data_path):
-            file.write(v + '\n')
+    if not os.path.exists(train_path):
+        with open(train_path, 'w', encoding='utf-8') as file:
+            for v in reader.get_train_data(train_data_path):
+                file.write(v + '\n')
+    if not os.path.exists(valid_path):
+        with open(valid_path, 'w', encoding='utf-8') as file:
+            for v in reader.get_valid_data(valid_data_path):
+                file.write(v + '\n')
 
     model = fasttext.supervised(train_path, model_path, label_prefix="__label__", epoch=10,
-                                word_ngrams=1, min_count=5, bucket=500000, lr=0.1, silent=0, loss='hs')
+                                word_ngrams=3, min_count=5, bucket=500000, lr=0.1, silent=0, loss='softmax')
 
     fasttext_train_result = model.test(train_path)
     print("FastText acc(train):", fasttext_train_result.precision, fasttext_train_result.recall)
@@ -66,7 +67,7 @@ def self_fasttext(vocab_size, embedding_size, label_size):
 
 def train_and_predict_by_self_realization(train_data_path, valid_data_path, vocab_path):
     """
-    利用pytorch自实现fasttext. 测试集准确率分别是0.713
+    利用pytorch自实现fasttext. 14轮达到最优, 测试集准确率是0.723
     :param train_data_path: 训练集路径
     :param valid_data_path: 测试集路径
     :param vocab_path: 字典路径
@@ -74,9 +75,7 @@ def train_and_predict_by_self_realization(train_data_path, valid_data_path, voca
     tokenizer, label_map, data = read_data(train_data_path, valid_data_path, vocab_path)
     model = self_fasttext(vocab_size=tokenizer.get_vocab_size(), embedding_size=32, label_size=len(label_map))
     learner = Learner(data, model)
-    learner.fit(epochs=10, lr=0.1, opt_fn=optim.Adagrad)
-    learner.accuracy_eval()
-    learner.confusion_eval(label_map)
+    learner.fit(epochs=20, init_lr=0.001, opt_fn=optim.Adam)
 
 
 if __name__=='__main__':

@@ -4,6 +4,8 @@ import jieba
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 
 ##############################################################################################################################################

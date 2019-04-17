@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from torch import nn, optim, cat
-from torch.functional import F
+import torch.nn.functional as F
 from data import read_data
 import sys
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 sys.path.append('../')
 from optimization import Learner
 
@@ -42,7 +40,7 @@ class TextCNN(nn.Module):
 
 def train_and_predict_by_textcnn(train_data_path, valid_data_path, vocab_path):
     """
-    利用pytorch实现textcnn进行建模. 测试集准确率为0.6865
+    利用pytorch实现textcnn进行建模. 14轮, 测试集准确率为0.702
     :param train_data_path: 训练集路径
     :param valid_data_path: 测试集路径
     :param vocab_path: 字典路径
@@ -56,9 +54,7 @@ def train_and_predict_by_textcnn(train_data_path, valid_data_path, vocab_path):
                     dropout=0.3,
                     label_size=len(label_map))
     learner = Learner(data, model)
-    learner.fit(epochs=5, lr=0.1, opt_fn=optim.Adagrad)
-    learner.accuracy_eval()
-    # learner.confusion_eval(label_map)
+    learner.fit(epochs=20, init_lr=0.001, opt_fn=optim.Adam)
 
 
 if __name__ == '__main__':
